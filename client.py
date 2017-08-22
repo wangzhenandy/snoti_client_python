@@ -22,25 +22,25 @@ class Client:
     DEFAULT_HOST = 'snoti.gizwits.com'
     DEFAULT_PORT = 2017
     
-    def __init__(self, product_key, auth_id, auth_secret, events = DEFAULT_EVENTS, subkey = DEFAULT_SUBKEY):
-        self.__product_key = product_key
-        self.__auth_id = auth_id
-        self.__auth_secret = auth_secret
-        self.__events = events
-        self.__subkey = subkey
-        self.__online = False
-        self.__recv_thread = None
-        self.__ping_thread = None
-        self.__create_handler()
+    def __init__(self, product_key, auth_id, auth_secret, events = DEFAULT_EVENTS, subkey = DEFAULT_SUBKEY, callback = None):
+        self._product_key = product_key
+        self._auth_id = auth_id
+        self._auth_secret = auth_secret
+        self._events = events
+        self._subkey = subkey
+        self._online = False
+        self._recv_thread = None
+        self._ping_thread = None
+        self._create_handler()
         # callback function
-        self._callback = None
+        self._callback = callback
 
-    def __create_handler(self):
-        self.__handler = {
-            'login_success': self.__handle_login_success,
-            'login_fault': self.__handle_login_fault,
-            'pong': self.__pong,
-            'ack': self.__ack
+    def _create_handler(self):
+        self._handler = {
+            'login_success': self._handle_login_success,
+            'login_fault': self._handle_login_fault,
+            'pong': self._pong,
+            'ack': self._ack
         }
 
     def connect(self, snoti_host = DEFAULT_HOST, snoti_port = DEFAULT_PORT):
@@ -50,80 +50,79 @@ class Client:
         ssl_sock.connect((snoti_host, snoti_port))
         print("socket connect success")
         self.ssl_sock = ssl_sock
-        self.__login()
-        if self.__recv_thread == None:
-            self.__recv_thread = threading.Thread(target=self.__recv_data, args=())
-            self.__recv_thread.setDaemon(True)
-            self.__recv_thread.start()
+        self._login()
+        if self._recv_thread == None:
+            self._recv_thread = threading.Thread(target=self._recv_data, args=())
+            self._recv_thread.setDaemon(True)
+            self._recv_thread.start()
 
     def disconnect(self):
-        self.__online = False
+        self._online = False
         self.ssl_sock.close()
 
     def control_kv(self, did, mac, attrs):
-        if self.__online:
+        if self._online:
             req = ControlReq()
-            req.add_control_kv('write_attrs', did, mac, self.__product_key, attrs)
-            req.build_json()
-            self.ssl_sock.sendall(str.encode(repr(req)))
+            req.add_control_kv('write_attrs', did, mac, self._product_key, attrs)
+            payload = req.build_json()
+            self.ssl_sock.sendall(str.encode(payload))
 
-    def __login(self):
+    def _login(self):
         req = LoginReq()
-        req.add_login_data(self.__product_key, self.__auth_id, self.__auth_secret, self.__subkey, self.__events)
-        req.build_json()
-        self.ssl_sock.sendall(str.encode(repr(req)))
+        req.add_login_data(self._product_key, self._auth_id, self._auth_secret, self._subkey, self._events)
+        payload = req.build_json()
+        self.ssl_sock.sendall(str.encode(payload))
     
-    def __ping(self):
+    def _ping(self):
         req = Request('ping')
-        req.build_json()
-        while self.__online:
-            self.ssl_sock.sendall(str.encode(repr(req)))
+        payload = req.build_json()
+        while self._online:
+            self.ssl_sock.sendall(str.encode(payload))
             sleep(self.HEAERBEAT_TIME)
 
-    def __ack(self, delivery_id):
+    def _ack(self, delivery_id):
         print('ack: %s' % (delivery_id))
         req = AckReq(delivery_id)
-        req.build_json()
+        payload = req.build_json()
         print(req)
-        if self.__online:
-            self.ssl_sock.sendall(str.encode(repr(req)))
+        if self._online:
+            self.ssl_sock.sendall(str.encode(payload))
 
-    def __recv_data(self):
+    def _recv_data(self):
         while True:
             rev_data = self.ssl_sock.recv(1024)
             if rev_data:
-                self.__handle_recv(rev_data)
+                self._handle_recv(rev_data)
             else:
                 break
         self.ssl_sock.close()
     
-    def __handle_recv(self, rev_data):
+    def _handle_recv(self, rev_data):
         resp = response.Response(rev_data)
-        handle_result, result_data = resp.handle(self)
-        if handle_result in self.__handler.keys():
-            self.__handler[handle_result](result_data)
+        handle_result, result_data = resp.handle(self._callback)
+        if handle_result in self._handler.keys():
+            self._handler[handle_result](result_data)
     
-    def __handle_login_success(self, *args):
+    def _handle_login_success(self, *args):
         print('login success')
-        self.__online = True
-        if self.__ping_thread == None:
-            self.__ping_thread = threading.Thread(target=self.__ping, args=())
-            self.__ping_thread.setDaemon(True)
-            self.__ping_thread.start()
+        self._online = True
+        if self._ping_thread == None:
+            self._ping_thread = threading.Thread(target=self._ping, args=())
+            self._ping_thread.setDaemon(True)
+            self._ping_thread.start()
     
-    def __handle_login_fault(self, *args):
+    def _handle_login_fault(self, *args):
         print('login fault')
         sleep(3)
-        self.login()
+        self._login()
     
-    def __pong(self, *args):
+    def _pong(self, *args):
         print('pong')
         pass
 
 if __name__ == '__main__':
-    client = Client("c74fd6e832eb42de80540d7d738fe025", "9UDAyB8pQY6w2HSewJmwvw", "r5A9PhsYQIGhJ03SSOsIqQ", subkey="sandbox_000")
     import callback
-    client.callback = callback
+    client = Client("c74fd6e832eb42de80540d7d738fe025", "9UDAyB8pQY6w2HSewJmwvw", "r5A9PhsYQIGhJ03SSOsIqQ", subkey="sandbox_000", callback = callback)
     client.connect()
     sleep(20)
     client.control_kv("8Namn3NCUNFRbuFiZ9NRaF", "virtual:site", {"number":5})
