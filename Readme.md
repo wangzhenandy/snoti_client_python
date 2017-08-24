@@ -8,8 +8,9 @@ v1.0.0
 ## 使用说明
 * 用户需要参考callback.py文件中的函数结构，实现一个自定义的callback模块，每个函数的参数格式和使用场景，请参考文件中的注释。
 * 接口说明：
-```
 
+```
+    
 # 实例化一个client对象
 # 参数说明：
 #     product_key：是产品标识，见开发者中心的产品信息
@@ -45,13 +46,15 @@ client.control_raw("8Namn3NCUNFRbuFiZ9NRaF", "virtual:site", '0011FF')
 
 # 断开与SNoti服务的连接
 client.disconnect()
-
+    
 ```
+
 **特别注意：控制的设备，必须属于客户端实例化时指定的产品(product_key)，并且did和mac必须是合法的，对应的。**
 
 * 使用例子：
 
 ```
+    
 #socket_cli.py
 #! python3
 # -*- coding: utf-8 -*-
@@ -176,6 +179,8 @@ def event_sub_dev_deleted(data):
 
 if __name__ == '__main__':
     pass
+
+    
 ```
 
 ## Change log: v1.0.0 (2017/08)
