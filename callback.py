@@ -9,7 +9,9 @@ data = {
 }
 '''
 def event_error(data):
-    pass
+    errcode = data['error_code']
+    msg = data['msg']
+    print('error: %s, %s' % (errcode, msg))
 
 '''
 data = {
@@ -25,7 +27,6 @@ def event_dev_online_offline(data):
     mac = data['mac']
     online_type = data['online_type']
     print('device %s: %s, %s' % (online_type, did, mac))
-    pass
 
 '''
 data = {
@@ -51,6 +52,12 @@ data = {
     },
     "created_at": <float>
 }
+其中，数据点kv的取值类型为：
+布尔类型，警告类型，故障类型的数据点，取值为0或1，0代表False，1代表True
+枚举类型的数据点，取值为数据点定义的枚举显示字符串，如遇中文，则使用unicode编码表示
+uint类型的数据点，取值为整数
+扩展类型的数据点，取值为hex字符串
+例如：{"binary": "0001ff0000", "bool1": 1, "enum": "\u7ea2\u8272", "number": 1, "alert": 0, "bool": 0}
 '''
 def event_dev_status_kv(data):
     did = data['did']
