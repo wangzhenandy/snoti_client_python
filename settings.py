@@ -11,11 +11,18 @@ LOGGING_CONFIG = {
         }
     },
     'handlers': {
-        'file': {"level": "INFO", "class": "logging.StreamHandler", "formatter": "standard"}
+        'file': {"level": "INFO", "class": "logging.StreamHandler", "formatter": "standard"},
+        'logfile': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'mytest.log',
+            'maxBytes': 64*1024*1024,
+            'backupCount': 10,
+            'formatter': 'standard',
+        }
     },
     'loggers': {
         'client': {
-            'handlers': ['file'],
+            'handlers': ['logfile'],
             'level': 'INFO'
         },
         'unittest_logger': {

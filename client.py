@@ -163,6 +163,7 @@ class Client:
         self._recv_thread = None
 
     def _handle_recv(self, rev_data):
+        logger.info('handle recv data: %s' % (rev_data))
         self._wait_pong_count = 0  #收到服务器数据，说明与服务器的连接正常，即清0
         try:
             resp = response.Response(rev_data)
@@ -204,10 +205,10 @@ class Client:
 
 if __name__ == '__main__':
     import callback
-    client = Client("c74fd6e832eb42de80540d7d738fe025", "9UDAyB8pQY6w2HSewJmwvw", "r5A9PhsYQIGhJ03SSOsIqQ", subkey="sandbox_000")
+    client = Client("e91465a87971450f9692411af5d4d297", "lsel0Ca4RBeLfczmHmwFAw", "4tHtcDp3ReyzZNZJAoJQfA", subkey="andy_test")
     client.connect()
-    sleep(20)
-    client.control_kv("8Namn3NCUNFRbuFiZ9NRaF", "virtual:site", {"binary":[0,1,255,0,0]})
+    sleep(200000)
+    # client.control_kv("8Namn3NCUNFRbuFiZ9NRaF", "virtual:site", {"binary":[0,1,255,0,0]})
     # sleep(60)
     # client.control_raw("8Namn3NCUNFRbuFiZ9NRaF", "virtual:site", "02")
     # sleep(60)
