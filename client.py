@@ -152,7 +152,7 @@ class Client:
         rev_data = ''
         while True:
             try:
-                rev_data += bytes.decode(self.ssl_sock.recv(1024))
+                rev_data += bytes.decode(self.ssl_sock.recv(1024), 'utf8', 'ignore')
                 if rev_data:
                     payloads = rev_data.split('\n')
                     rev_data = payloads.pop(-1)

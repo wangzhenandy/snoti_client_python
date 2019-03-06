@@ -1,6 +1,6 @@
 snoti client
 =======
-v1.0.0
+v1.0.2
 
 ## Prerequisites
 * [Python 3](https://www.python.org/)
@@ -182,6 +182,11 @@ if __name__ == '__main__':
 
     
 ```
+## Change log: v1.0.2
+* 修复编码问题
+
+## Change log: v1.0.1
+* Ignore
 
 ## Change log: v1.0.0 (2017/08)
 * First version
